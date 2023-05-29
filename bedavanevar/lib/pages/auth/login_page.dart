@@ -1,54 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class LoginPage extends StatelessWidget {
-  final _phoneNumberController = TextEditingController();
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  LoginPage({super.key});
+final googleSignInProvider = FutureProvider.autoDispose((ref) async {
+  // Google Sign-In logic
+});
 
-  Future<void> _signInWithPhone(BuildContext context) async {
-    final String phoneNumber = _phoneNumberController.text.trim();
+final twitterSignInProvider = FutureProvider.autoDispose((ref) async {
+  // Twitter Sign-In logic
+});
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Otomatik doğrulama tamamlandığında
-        // credential ile oturum açma işlemini tamamlayabilirsiniz.
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        // Doğrulama başarısız olduğunda hata durumunu işleyebilirsiniz.
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        // Doğrulama kodu başarıyla gönderildiğinde
-        // verificationId ve resendToken ile ilgili işlemleri gerçekleştirebilirsiniz.
-        // Örneğin, kodu kullanıcıya girmesi için başka bir sayfaya yönlendirebilirsiniz.
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Kod otomatik olarak alınma süresi dolduğunda işlemleri gerçekleştirebilirsiniz.
-      },
-    );
-  }
+final phoneNumberSignInProvider = FutureProvider.autoDispose((ref) async {
+  // Phone Sign-In logic
+});
+
+class LoginPage extends HookConsumerWidget {
+  const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final googleSignIn = ref.watch(googleSignInProvider);
+    final twitterSignIn = ref.watch(twitterSignInProvider);
+    final phoneNumberSignIn = ref.watch(phoneNumberSignInProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: const Text('Login Page'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _phoneNumberController,
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-              ),
-            ),
-            SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () => _signInWithPhone(context),
-              child: Text('Sign In'),
+              onPressed: googleSignIn.when(
+                data: (_) => null,
+                loading: () => null,
+                error: (_, __) => null,
+              ),
+              child: const Text('Sign in with Google'),
+            ),
+            ElevatedButton(
+              onPressed: twitterSignIn.when(
+                data: (_) => null,
+                loading: () => null,
+                error: (_, __) => null,
+              ),
+              child: const Text('Sign in with Twitter'),
+            ),
+            ElevatedButton(
+              onPressed: phoneNumberSignIn.when(
+                data: (_) => null,
+                loading: () => null,
+                error: (_, __) => null,
+              ),
+              child: const Text('Sign in with Phone'),
             ),
           ],
         ),
