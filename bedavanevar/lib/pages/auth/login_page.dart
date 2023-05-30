@@ -1,30 +1,24 @@
+import 'package:bedavanevar/states.dart';
+import 'package:bedavanevar/viewmodels/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-
-final googleSignInProvider = FutureProvider.autoDispose((ref) async {
-  // Google Sign-In logic
-});
-
-final twitterSignInProvider = FutureProvider.autoDispose((ref) async {
-  // Twitter Sign-In logic
-});
-
-final phoneNumberSignInProvider = FutureProvider.autoDispose((ref) async {
-  // Phone Sign-In logic
-});
-
-class LoginPage extends HookConsumerWidget {
+class LoginPage extends StatefulHookConsumerWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final googleSignIn = ref.watch(googleSignInProvider);
-    final twitterSignIn = ref.watch(twitterSignInProvider);
-    final phoneNumberSignIn = ref.watch(phoneNumberSignInProvider);
+  ConsumerState<LoginPage> createState() => _LoginState();
+}
 
+class _LoginState extends ConsumerState<LoginPage> {
+  @override
+  Widget build(BuildContext context) {
+    var controller = ref.read(authController.notifier);
+    ref.listen<ControllerState>(authController, ((previous, state) {
+      if (state is ErrorState) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+      }
+    }));
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login Page'),
@@ -34,27 +28,15 @@ class LoginPage extends HookConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: googleSignIn.when(
-                data: (_) => null,
-                loading: () => null,
-                error: (_, __) => null,
-              ),
+              onPressed: () => controller.googleSignIn(),
               child: const Text('Sign in with Google'),
             ),
             ElevatedButton(
-              onPressed: twitterSignIn.when(
-                data: (_) => null,
-                loading: () => null,
-                error: (_, __) => null,
-              ),
+              onPressed: () => controller.twitterSignIn(),
               child: const Text('Sign in with Twitter'),
             ),
             ElevatedButton(
-              onPressed: phoneNumberSignIn.when(
-                data: (_) => null,
-                loading: () => null,
-                error: (_, __) => null,
-              ),
+              onPressed: () => controller.phoneSignIn(),
               child: const Text('Sign in with Phone'),
             ),
           ],
